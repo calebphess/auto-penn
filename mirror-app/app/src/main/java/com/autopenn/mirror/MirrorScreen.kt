@@ -29,7 +29,7 @@ import androidx.car.app.navigation.model.NavigationTemplate
  */
 const val ACTION_LAUNCH = "com.autopenn.mirror.LAUNCH"
 
-class MirrorScreen(carContext: CarContext) : Screen(carContext) {
+class MirrorScreen(carContext: CarContext, private val autoPkg: String? = null) : Screen(carContext) {
     private val tag = "MirrorScreen"
     init { HelperClient.init(carContext) }
     private val handler = Handler(Looper.getMainLooper())
@@ -46,6 +46,16 @@ class MirrorScreen(carContext: CarContext) : Screen(carContext) {
     }
 
     private var receiverRegistered = false
+
+    /** Launches [autoPkg] on the mirror as soon as the display exists and the helper answers (it may still be starting). */
+    private fun autoLaunch() {
+        val pkg = autoPkg ?: return
+        Thread {
+            val deadline = System.currentTimeMillis() + 120_000
+            while (System.currentTimeMillis() < deadline && !(VirtualScreen.displayId >= 0 && HelperSetup.isHelperUp(carContext))) Thread.sleep(500)
+            if (VirtualScreen.displayId >= 0) { Thread.sleep(800); HelperClient.start(VirtualScreen.displayId, pkg) }
+        }.start()
+    }
 
     /** `adb shell am broadcast -a com.autopenn.mirror.LAUNCH --es pkg com.google.android.youtube` */
     private val launchReceiver = object : BroadcastReceiver() {
@@ -73,6 +83,7 @@ class MirrorScreen(carContext: CarContext) : Screen(carContext) {
         VirtualScreen.attachFit(carContext, c.surface!!, c.height, visible, c.dpi)
         carContext.registerReceiver(launchReceiver, IntentFilter(ACTION_LAUNCH), Context.RECEIVER_EXPORTED)
         receiverRegistered = true
+        autoLaunch()
     }
 
     private val callback = object : SurfaceCallback {
@@ -96,6 +107,7 @@ class MirrorScreen(carContext: CarContext) : Screen(carContext) {
             VirtualScreen.attach(carContext, container.surface!!, container.width, container.height, container.dpi)
             carContext.registerReceiver(launchReceiver, IntentFilter(ACTION_LAUNCH), Context.RECEIVER_EXPORTED)
             receiverRegistered = true
+            autoLaunch()
             // Fallback test pattern is no longer painted: the VirtualDisplay owns the surface.
         }
 
@@ -182,6 +194,7 @@ class MirrorScreen(carContext: CarContext) : Screen(carContext) {
         NavigationTemplate.Builder()
             .setActionStrip(
                 ActionStrip.Builder()
+                    .addAction(Action.Builder().setTitle("Home").setOnClickListener { screenManager.pop() }.build())
                     .addAction(Action.Builder().setTitle("Exit").setOnClickListener { carContext.finishCarApp() }.build())
                     .build()
             )
