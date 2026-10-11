@@ -53,6 +53,7 @@ class MirrorScreen(carContext: CarContext) : Screen(carContext) {
             val pkg = intent.getStringExtra("pkg") ?: return
             val id = VirtualScreen.displayId
             Log.i(tag, "launching $pkg on display $id")
+            context.getSharedPreferences("auto", Context.MODE_PRIVATE).edit().putString("last_pkg", pkg).apply()
             HelperClient.start(id, pkg)
         }
     }
