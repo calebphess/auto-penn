@@ -1,0 +1,10 @@
+# Installed to /vendor/etc/init/autopenn-helper.rc on the Pi.
+# Runs the Auto Penn Mirror helper as the shell user (launches apps onto, and injects touch into, our VirtualDisplay).
+service autopenn_helper /system/bin/app_process -Djava.class.path=/system/priv-app/AutoPennMirror/AutoPennMirror.apk /system/bin --nice-name=autopenn_helper com.autopenn.mirror.Helper
+    class late_start
+    user shell
+    group shell input log
+    disabled
+
+on property:sys.boot_completed=1
+    start autopenn_helper

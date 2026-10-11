@@ -1,0 +1,20 @@
+# build output / caches
+build/
+.gradle/
+*.apk
+*.aab
+local.properties
+.idea/
+.DS_Store
+.playwright-mcp/
+
+# large downloads and toolchains (re-fetchable)
+downloads/
+tools/gradle-*/
+tools/gradle-*.zip
+backups/*.img*
+
+# signing material: never commit (kept in ~/keys-and-certs)
+*.jks
+*.keystore
+*signing.properties

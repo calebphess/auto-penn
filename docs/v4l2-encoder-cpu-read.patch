@@ -1,0 +1,22 @@
+diff --git a/components/V4L2EncodeInterface.cpp b/components/V4L2EncodeInterface.cpp
+index 03d8c37..21d5d71 100644
+--- a/components/V4L2EncodeInterface.cpp
++++ b/components/V4L2EncodeInterface.cpp
+@@ -389,10 +389,13 @@ void V4L2EncodeInterface::Initialize(const C2String& name) {
+     // will be performed between the guest and host buffer to keep them in sync. This is wasteful as
+     // the buffer is only used on guest side by the format convertor which converts and copies the
+     // buffer into another buffer.
+-    //addParameter(DefineParam(mInputMemoryUsage, C2_PARAMKEY_INPUT_STREAM_USAGE)
+-    //                     .withConstValue(new C2StreamUsageTuning::input(
+-    //                             0u, static_cast<uint64_t>(BufferUsage::VIDEO_ENCODER)))
+-    //                     .build());
++    // auto-penn: the format convertor maps every input block on the CPU (RGBA/NV12 -> device format),
++    // so the producer must allocate CPU-readable buffers. Without this the gralloc mapper refuses
++    // lock() ("not allocated with a BufferUsage::CPU_* usage") when Android Auto feeds a GPU surface.
++    addParameter(DefineParam(mInputMemoryUsage, C2_PARAMKEY_INPUT_STREAM_USAGE)
++                         .withConstValue(new C2StreamUsageTuning::input(
++                                 0u, static_cast<uint64_t>(C2MemoryUsage::CPU_READ)))
++                         .build());
+ 
+     addParameter(
+             DefineParam(mOutputFormat, C2_PARAMKEY_OUTPUT_STREAM_BUFFER_TYPE)
