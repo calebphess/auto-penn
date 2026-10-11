@@ -328,3 +328,10 @@ Result: **the same app works on a stock phone; smooth video, no ROM patching.**
 - Gotchas found: (1) NsdManager callbacks must not use an executor we shut down (crash). (2) adbd kills a freshly forked child when a RAW shell stream closes immediately (adb exec-out / libadb); hold the stream open ~4 s (`& sleep 4`). (3) Android prompts "Allow wireless debugging on this network?" on first enable; human must tap Allow. (4) tools: scratchpad ui.py/pair.py automated the Settings UI over USB adb (uiautomator dump + input tap; notification RemoteInput works via adb input text).
 - Play publishing flow (internal testing) via Playwright documented in memory play-publishing.md.
 - TODO: confirm in the real Corvette; helper needs re-start after each phone reboot (Wi-Fi + Wireless debugging on, tap Start helper, or just connect the car: service auto-restarts it if paired).
+
+## Session 6 (v1 branch): auto-start + car home screen
+- Repo: github.com/calebphess/auto-penn (public). v0 tagged on main, work on branch v1.
+- 0.4.0: app turns Wireless debugging on itself (needs one-time `adb shell pm grant com.penn.auto_penn android.permission.WRITE_SECURE_SETTINGS`). Verified on the Razr: helper killed + wireless debugging off -> Start helper re-enabled it and relaunched the helper.
+- 0.4.1: car session retries starting the helper for 2 min. 0.4.2: HomeScreen (ListTemplate, clock in title, app list), mirror's button is now "Apps" (pops back). 0.4.3: Maps and Spotify added.
+- Wi-Fi gotcha: wireless debugging only works on a Wi-Fi network already approved on the phone; helper survives network changes once running.
+- Untested: HomeScreen on a real head unit/DHU, auto restart in the car.
