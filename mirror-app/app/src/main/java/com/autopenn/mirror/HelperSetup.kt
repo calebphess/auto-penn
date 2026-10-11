@@ -48,12 +48,23 @@ object HelperSetup {
 
     fun isPaired(ctx: Context) = File(ctx.filesDir, "adb_paired").exists()
 
+    /** Turns Wireless debugging on if this app was granted WRITE_SECURE_SETTINGS (one-time `adb shell pm grant`). Android clears it on car/ignition cycles. */
+    private fun enableWirelessDebugging(ctx: Context) {
+        if (ctx.checkSelfPermission("android.permission.WRITE_SECURE_SETTINGS") != android.content.pm.PackageManager.PERMISSION_GRANTED) return
+        try {
+            if (Settings.Global.getInt(ctx.contentResolver, "adb_wifi_enabled", 0) == 1) return
+            Settings.Global.putInt(ctx.contentResolver, "adb_wifi_enabled", 1)
+            Thread.sleep(2500) // let adbd open the TLS port and advertise it
+        } catch (e: Exception) { Log.w(TAG, "enableWirelessDebugging failed", e) }
+    }
+
     /** Connects to adbd (already paired) and (re)starts the helper. Blocking: call from a background thread. */
     fun startHelper(ctx: Context): Boolean {
         if (busy) return false
         busy = true
         try {
             val mgr = AdbManager.get(ctx)
+            enableWirelessDebugging(ctx)
             if (!mgr.isConnected && !mgr.autoConnect(ctx, 8000)) {
                 lastError = "Could not reach Wireless debugging. Turn it on in Developer options (Wi-Fi needed)."
                 return false
