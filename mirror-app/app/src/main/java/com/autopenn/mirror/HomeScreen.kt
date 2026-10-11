@@ -5,8 +5,8 @@ import android.os.Looper
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
-import androidx.car.app.model.Pane
-import androidx.car.app.model.PaneTemplate
+import androidx.car.app.model.ItemList
+import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -28,21 +28,26 @@ class HomeScreen(carContext: CarContext) : Screen(carContext) {
         })
     }
 
+    private val apps = listOf(
+        "YouTube" to "com.google.android.youtube",
+        "Google Maps" to "com.google.android.apps.maps",
+        "Netflix" to "com.netflix.mediaclient",
+        "Crunchyroll" to "com.crunchyroll.crunchyroid",
+        "Chrome" to "com.android.chrome",
+    )
+
     override fun onGetTemplate(): Template {
         val now = Date()
-        val pane = Pane.Builder()
-            .addRow(
-                Row.Builder()
-                    .setTitle(DateFormat.getTimeInstance(DateFormat.SHORT).format(now))
-                    .addText(DateFormat.getDateInstance(DateFormat.FULL).format(now))
-                    .build()
-            )
-            .addAction(
-                Action.Builder().setTitle("YouTube").setOnClickListener {
-                    screenManager.push(MirrorScreen(carContext, "com.google.android.youtube"))
+        val list = ItemList.Builder()
+        apps.forEach { (name, pkg) ->
+            list.addItem(
+                Row.Builder().setTitle(name).setOnClickListener {
+                    screenManager.push(MirrorScreen(carContext, pkg))
                 }.build()
             )
-            .build()
-        return PaneTemplate.Builder(pane).setTitle("Auto Penn").build()
+        }
+        val clock = DateFormat.getTimeInstance(DateFormat.SHORT).format(now) + "  ·  " +
+            java.text.SimpleDateFormat("EEE MMM d", java.util.Locale.getDefault()).format(now)
+        return ListTemplate.Builder().setSingleList(list.build()).setTitle("Auto Penn   $clock").build()
     }
 }
