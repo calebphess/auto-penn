@@ -31,6 +31,7 @@ class HomeScreen(carContext: CarContext) : Screen(carContext) {
     private val apps = listOf(
         "YouTube" to "com.google.android.youtube",
         "Google Maps" to "com.google.android.apps.maps",
+        "Spotify" to "com.spotify.music",
         "Netflix" to "com.netflix.mediaclient",
         "Crunchyroll" to "com.crunchyroll.crunchyroid",
         "Chrome" to "com.android.chrome",

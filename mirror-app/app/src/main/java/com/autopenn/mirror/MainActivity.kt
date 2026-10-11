@@ -23,6 +23,7 @@ class MainActivity : Activity() {
         "Netflix" to "com.netflix.mediaclient",
         "Crunchyroll" to "com.crunchyroll.crunchyroid",
         "Google Maps" to "com.google.android.apps.maps",
+        "Spotify" to "com.spotify.music",
         "Chrome" to "com.android.chrome",
     )
 
